@@ -1,30 +1,48 @@
-from sqlalchemy.orm import Session
-from . import models, schemas
+from .models import Brand
+from .database import SessionLocal
 
-def get_brands(db: Session):
-    return db.query(models.Brand).all()
+# Helper para obtener la sesión
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
-def get_brand(db: Session, brand_id: int):
-    return db.query(models.Brand).filter(models.Brand.id == brand_id).first()
+# Obtener todas las marcas
+def get_brands():
+    db = next(get_db())
+    return db.query(Brand).all()
 
-def create_brand(db: Session, brand: schemas.BrandCreate):
-    db_brand = models.Brand(**brand.dict())
+# Obtener marca por ID
+def get_brand(brand_id):
+    db = next(get_db())
+    return db.query(Brand).filter(Brand.id == brand_id).first()
+
+# Crear marca
+def create_brand(data):
+    db = next(get_db())
+    db_brand = Brand(**data)  # data es un dict con los campos de Brand
     db.add(db_brand)
     db.commit()
     db.refresh(db_brand)
     return db_brand
 
-def update_brand(db: Session, brand_id: int, brand: schemas.BrandUpdate):
-    db_brand = db.query(models.Brand).filter(models.Brand.id == brand_id).first()
+# Actualizar marca
+def update_brand(brand_id, data):
+    db = next(get_db())
+    db_brand = db.query(Brand).filter(Brand.id == brand_id).first()
     if db_brand:
-        for key, value in brand.dict().items():
+        for key, value in data.items():
             setattr(db_brand, key, value)
         db.commit()
         db.refresh(db_brand)
     return db_brand
 
-def delete_brand(db: Session, brand_id: int):
-    db_brand = db.query(models.Brand).filter(models.Brand.id == brand_id).first()
+# Eliminar marca
+def delete_brand(brand_id):
+    db = next(get_db())
+    db_brand = db.query(Brand).filter(Brand.id == brand_id).first()
     if db_brand:
         db.delete(db_brand)
         db.commit()

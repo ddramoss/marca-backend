@@ -6,3 +6,6 @@ pip install -r requirements.txt
 
 Levantar servidor:
 uvicorn app.main:app --reload
+
+Cambio al levantar server
+uvicorn app.app:app --reload

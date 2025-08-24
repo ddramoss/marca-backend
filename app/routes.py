@@ -1,34 +1,42 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from . import crud, schemas, database
+from flask import Blueprint, jsonify, request
+from .crud import get_brands, get_brand, create_brand, update_brand, delete_brand
 
-router = APIRouter(prefix="/brands", tags=["brands"])
+brands_bp = Blueprint('brands', __name__, url_prefix='/brands')
 
-def get_db():
-    db = database.SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# Obtener todas las marcas
+@brands_bp.route('/', methods=['GET'])
+def list_brands():
+    brands = get_brands()
+    # Convertir a lista de dicts para JSON
+    result = [b.__dict__ for b in brands]
+    for b in result:
+        b.pop('_sa_instance_state', None)  # Eliminar objeto interno de SQLAlchemy
+    return jsonify(result)
 
-@router.get("/", response_model=list[schemas.BrandOut])
-def list_brands(db: Session = Depends(get_db)):
-    return crud.get_brands(db)
+# Crear una marca
+@brands_bp.route('/', methods=['POST'])
+def add_brand():
+    data = request.json
+    brand = create_brand(data)
+    result = brand.__dict__
+    result.pop('_sa_instance_state', None)
+    return jsonify(result), 201
 
-@router.post("/", response_model=schemas.BrandOut)
-def create_brand(brand: schemas.BrandCreate, db: Session = Depends(get_db)):
-    return crud.create_brand(db, brand)
+# Actualizar una marca
+@brands_bp.route('/<int:brand_id>', methods=['PUT'])
+def edit_brand(brand_id):
+    data = request.json
+    brand = update_brand(brand_id, data)
+    if not brand:
+        return jsonify({"error": "Marca no encontrada"}), 404
+    result = brand.__dict__
+    result.pop('_sa_instance_state', None)
+    return jsonify(result)
 
-@router.put("/{brand_id}", response_model=schemas.BrandOut)
-def update_brand(brand_id: int, brand: schemas.BrandUpdate, db: Session = Depends(get_db)):
-    db_brand = crud.update_brand(db, brand_id, brand)
-    if not db_brand:
-        raise HTTPException(status_code=404, detail="Marca no encontrada")
-    return db_brand
-
-@router.delete("/{brand_id}")
-def delete_brand(brand_id: int, db: Session = Depends(get_db)):
-    db_brand = crud.delete_brand(db, brand_id)
-    if not db_brand:
-        raise HTTPException(status_code=404, detail="Marca no encontrada")
-    return {"ok": True}
+# Eliminar una marca
+@brands_bp.route('/<int:brand_id>', methods=['DELETE'])
+def remove_brand(brand_id):
+    brand = delete_brand(brand_id)
+    if not brand:
+        return jsonify({"error": "Marca no encontrada"}), 404
+    return jsonify({"ok": True})
