@@ -11,7 +11,10 @@ app = Flask(__name__)
 # Configurar CORS para React
 origins = [
     "http://localhost:3000",  # desarrollo
-    "https://tu-frontend.vercel.app"  # producción
+    "https://tu-frontend.vercel.app",  # producción
+    "https://marca-frotend.vercel.app",
+    "https://marca-frontend.vercel.app",
+    "marca-frotend-k67wcw3c5-ddramoss-projects.vercel.app",
 ]
 CORS(app, origins=origins)
 
