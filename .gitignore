@@ -1,0 +1,15 @@
+# Entorno virtual
+venv/
+
+# Archivos de bases de datos
+*.db
+
+# Archivos temporales de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Otros
+*.log
+.vscode
