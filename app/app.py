@@ -9,11 +9,10 @@ init_db()
 app = Flask(__name__)
 
 # Configurar CORS para React
-origins = [
-    "http://localhost:3000",  # desarrollo
-    "https://marca-signa-front.vercel.app/",  # producción
-]
-CORS(app, origins=origins)
+CORS(app, resources={r"/*": {"origins": [
+    "http://localhost:3000",
+    "https://marca-signa-front.vercel.app"
+]}})
 
 # Registrar blueprint de rutas
 app.register_blueprint(brands_bp)
