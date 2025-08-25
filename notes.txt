@@ -9,3 +9,7 @@ uvicorn app.main:app --reload
 
 Cambio al levantar server
 uvicorn app.app:app --reload
+
+
+set FLASK_APP=app.app
+flask run
